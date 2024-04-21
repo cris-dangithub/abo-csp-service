@@ -4,4 +4,4 @@ from algorithms.abo_csp import ABO_CSP
 
 abo = ABO_CSP(data)
 
-print(abo.createRandomBuffaloes())
+print(abo.getBuffaloes(5))

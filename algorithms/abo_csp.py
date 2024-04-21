@@ -14,8 +14,20 @@ class ABO_CSP:
         # self.lp1 = lp1
         # self.lp2 = lp2
 
-    def createRandomBuffaloes(self):
-        buffaloues = []
+    def getBuffaloes(self, qbuff):
+        """
+        qbuff -> quanitity buffaloues to generate
+        """
+        if qbuff <= 0:
+            raise ("Quantity must be positive number")
+        buffaloes = []
+        for i in range(qbuff):
+            buffaloes.append(self._createRandomBuffaloe())
+        return buffaloes
+
+    def _createRandomBuffaloe(
+        self,
+    ):  # TODOCRIS Posiblemente pasar a una entidad "Buffaloe"
         individualItemsByNOrder = []
         totalIndividualItems = sum(item["barsQuantity"] for item in self.items)
         ordersByIdxQuantity = {
@@ -37,7 +49,7 @@ class ABO_CSP:
         stockUsed = 0
         stocksWithWaste = 0  # barras desperdiciadas
         totalWaste = {
-            "stock": 0,
+            "totalLength": 0,
             "lenghts": [],
         }
         currentStockLength = stock
@@ -55,7 +67,7 @@ class ABO_CSP:
                 currentStockLength = cuttingResultInCurrentStock
             elif cuttingResultInCurrentStock < 0:
                 # Si el corte cabe en el stock actual, se procede a cortar en el stock actual, actualizando la longitud actual del stock actual
-                totalWaste["stock"] = round(totalWaste["stock"] + currentStockLength, 2)
+                totalWaste["totalLength"] = round(totalWaste["totalLength"] + currentStockLength, 2)
                 totalWaste["lenghts"].append(currentStockLength)
                 # usar un nuevo stock (generamos desperdicio)
                 stocksWithWaste += 1
