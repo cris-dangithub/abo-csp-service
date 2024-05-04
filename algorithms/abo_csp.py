@@ -6,6 +6,8 @@ from copy import deepcopy
 class ABO_CSP:
     def __init__(self, data):
         self.items = data["steelSheet"]
+        self.totalItemLengths = self._getTotalItemLengths()
+        print({"totalItemsss": self.totalItemLengths})
         # self.long_stock = long_stock
         # self.num_buffaloes = num_buffaloes
         # self.sol_population = sol_population
@@ -25,6 +27,11 @@ class ABO_CSP:
             buffaloes.append(self._createRandomBuffaloe())
         return buffaloes
 
+    def _getTotalItemLengths(self):
+        return sum(
+            [round(item["lengthBar"] * item["barsQuantity"], 2) for item in self.items]
+        )
+
     def _createRandomBuffaloe(
         self,
     ):  # TODOCRIS Posiblemente pasar a una entidad "Buffaloe"
@@ -34,14 +41,20 @@ class ABO_CSP:
             idx: item["barsQuantity"] for idx, item in enumerate(self.items)
         }
         # Obtener las posiciones randoms a ejecutar los patrones de corte
-        ordersByIdxQuantityCopyTOGetPositions = deepcopy(ordersByIdxQuantity)
+        ordersByIdxQuantityCopyToGetPositions = deepcopy(ordersByIdxQuantity)
         for i in range(totalIndividualItems):
             randomOrderIndex = getRandomAvailableOrder(
-                orders=ordersByIdxQuantityCopyTOGetPositions
+                orders=ordersByIdxQuantityCopyToGetPositions
             )
             individualItemsByNOrder.append(randomOrderIndex)
-
+        print(
+            "cutting pattern by # order",
+            self._getCuttingPattern(individualItemsByNOrder),
+        )
         return self._getBuffaloeData(individualItemsByNOrder, ordersByIdxQuantity)
+
+    def _getCuttingPattern(self, idxOrders):
+        return ["#{}".format(self.items[idx]["n_order"]) for idx in idxOrders]
 
     def _getBuffaloeData(self, listIndividualOrders, ordersByQuantity):
         # Aplicar el stock (Ej: 6metros, 9metros, 12metros)#TODOCRIS Aplicar la clase Cutter
@@ -67,7 +80,9 @@ class ABO_CSP:
                 currentStockLength = cuttingResultInCurrentStock
             elif cuttingResultInCurrentStock < 0:
                 # Si el corte cabe en el stock actual, se procede a cortar en el stock actual, actualizando la longitud actual del stock actual
-                totalWaste["totalLength"] = round(totalWaste["totalLength"] + currentStockLength, 2)
+                totalWaste["totalLength"] = round(
+                    totalWaste["totalLength"] + currentStockLength, 2
+                )
                 totalWaste["lenghts"].append(currentStockLength)
                 # usar un nuevo stock (generamos desperdicio)
                 stocksWithWaste += 1
@@ -82,8 +97,29 @@ class ABO_CSP:
 
         result = {
             "stockUsed": stockUsed,
-            "ordersByQuantity": ordersByQuantity,
             "stocksWithWaste": stocksWithWaste,
             "totalWaste": totalWaste,
+            "percentage": self._getWastePercentage(totalWaste["totalLength"]),
         }
         return result
+
+    def _getWastePercentage(self, wasteTotalLength):
+        return round((wasteTotalLength / self.totalItemLengths) * 100, 2)
+
+    def _printTable(self, table: list[object]):
+        print(
+            "{:<10} {:<15} {:<10} {}".format(
+                "Buffalo", "used/wtWast", "Waste (%)", "Info waste"
+            )
+        )
+        for idx, obj in enumerate(table):
+
+            print(
+                "{:<10} {:<15} {:<10} {}".format(
+                    idx + 1,
+                    "{}/{}".format(obj["stockUsed"], obj["stocksWithWaste"]),
+                    "%{}".format(obj["percentage"]),
+                    obj["totalWaste"],
+                )
+            )
+        print("\n")

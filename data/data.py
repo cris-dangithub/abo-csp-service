@@ -15,9 +15,9 @@ weights = {
 
 data = {
     "steelSheet": [
-        {"n_order": 1, "gauge": "#4", "lengthBar": 1.5, "barsQuantity": 7},
-        {"n_order": 2, "gauge": "#4", "lengthBar": 4, "barsQuantity": 3},
-        {"n_order": 6, "gauge": "#4", "lengthBar": 3.6, "barsQuantity": 5},
+        {"n_order": 1, "gauge": "#4", "lengthBar": 1.5, "barsQuantity": 7},#10.5
+        {"n_order": 2, "gauge": "#4", "lengthBar": 4, "barsQuantity": 3},#12
+        {"n_order": 6, "gauge": "#4", "lengthBar": 3.6, "barsQuantity": 5},#18
     ],
     "stock": [
         {"gauge": "#4", "lengthBar": 6, "barsQuantity": 20},
