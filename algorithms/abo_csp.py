@@ -47,10 +47,6 @@ class ABO_CSP:
                 orders=ordersByIdxQuantityCopyToGetPositions
             )
             individualItemsByNOrder.append(randomOrderIndex)
-        print(
-            "cutting pattern by # order",
-            self._getCuttingPattern(individualItemsByNOrder),
-        )
         return self._getBuffaloeData(individualItemsByNOrder, ordersByIdxQuantity)
 
     def _getCuttingPattern(self, idxOrders):
@@ -100,6 +96,7 @@ class ABO_CSP:
             "stocksWithWaste": stocksWithWaste,
             "totalWaste": totalWaste,
             "percentage": self._getWastePercentage(totalWaste["totalLength"]),
+            "cuttingPattern": self._getCuttingPattern(listIndividualOrders),
         }
         return result
 
@@ -107,6 +104,7 @@ class ABO_CSP:
         return round((wasteTotalLength / self.totalItemLengths) * 100, 2)
 
     def _printTable(self, table: list[object]):
+        print("TABLA RESUMEN DE BUFALOS")
         print(
             "{:<10} {:<15} {:<10} {}".format(
                 "Buffalo", "used/wtWast", "Waste (%)", "Info waste"
