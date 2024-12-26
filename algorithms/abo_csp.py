@@ -7,7 +7,7 @@ class ABO_CSP:
     def __init__(self, data):
         self.items = data["steelSheet"]
         self.totalItemLengths = self._getTotalItemLengths()
-        print({"totalItemsss": self.totalItemLengths})
+        print({"totalItemLengths": self.totalItemLengths})
         # self.long_stock = long_stock
         # self.num_buffaloes = num_buffaloes
         # self.sol_population = sol_population
@@ -16,15 +16,35 @@ class ABO_CSP:
         # self.lp1 = lp1
         # self.lp2 = lp2
 
+    def bgmaxSearch(self, buffaloes: list[dict]):
+        """
+        Best solution is the one with the least waste
+        """
+        bestBuffaloe = min(buffaloes, key=lambda x: x["percentage"])
+        return {
+            "buffNum": bestBuffaloe["buffNum"],
+            "percentage": bestBuffaloe["percentage"],
+            "cuttingPattern": bestBuffaloe["cuttingPattern"],
+        }
+
+    def _getMb(self, buffaloes: list[dict]):
+        """
+        Fitness function
+        """
+        for buff in buffaloes:
+            buff["fitness"] = (
+                buff["stocksWithWaste"] + buff["totalWaste"]["totalLength"]
+            )
+        return buffaloes
+
     def getBuffaloes(self, qbuff):
         """
         qbuff -> quanitity buffaloues to generate
         """
-        if qbuff <= 0:
-            raise ("Quantity must be positive number")
+        assert qbuff > 0, "Quantity must be positive number"
         buffaloes = []
         for i in range(qbuff):
-            buffaloes.append(self._createRandomBuffaloe())
+            buffaloes.append({"buffNum": i + 1, **self._createRandomBuffaloe()})
         return buffaloes
 
     def _getTotalItemLengths(self):
@@ -34,12 +54,14 @@ class ABO_CSP:
 
     def _createRandomBuffaloe(
         self,
-    ):  # TODOCRIS Posiblemente pasar a una entidad "Buffaloe"
+    ):  # TODOCRIS Pasar a una clase "Buffaloe"
         individualItemsByNOrder = []
         totalIndividualItems = sum(item["barsQuantity"] for item in self.items)
+        print({"totalIndividualItemsQuantity": totalIndividualItems})
         ordersByIdxQuantity = {
             idx: item["barsQuantity"] for idx, item in enumerate(self.items)
         }
+        print({"ordersByIdxQuantity": ordersByIdxQuantity})
         # Obtener las posiciones randoms a ejecutar los patrones de corte
         ordersByIdxQuantityCopyToGetPositions = deepcopy(ordersByIdxQuantity)
         for i in range(totalIndividualItems):
@@ -47,6 +69,14 @@ class ABO_CSP:
                 orders=ordersByIdxQuantityCopyToGetPositions
             )
             individualItemsByNOrder.append(randomOrderIndex)
+            print(
+                ">>",
+                {
+                    "ordersByIdxQuantityCopyToGetPositions": ordersByIdxQuantityCopyToGetPositions,
+                    "individualItemsByNOrder": individualItemsByNOrder,
+                    "randomOrderIndex": randomOrderIndex,
+                },
+            )
         return self._getBuffaloeData(individualItemsByNOrder, ordersByIdxQuantity)
 
     def _getCuttingPattern(self, idxOrders):
@@ -103,7 +133,7 @@ class ABO_CSP:
     def _getWastePercentage(self, wasteTotalLength):
         return round((wasteTotalLength / self.totalItemLengths) * 100, 2)
 
-    def _printTable(self, table: list[object]):
+    def _printTable(self, table: list[dict]):
         print("TABLA RESUMEN DE BUFALOS")
         print(
             "{:<10} {:<15} {:<10} {}".format(
@@ -114,7 +144,7 @@ class ABO_CSP:
 
             print(
                 "{:<10} {:<15} {:<10} {}".format(
-                    idx + 1,
+                    obj["buffNum"],
                     "{}/{}".format(obj["stockUsed"], obj["stocksWithWaste"]),
                     "%{}".format(obj["percentage"]),
                     obj["totalWaste"],
